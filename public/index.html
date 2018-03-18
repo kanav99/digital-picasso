@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="utf-8" />
+   <title>Desktops and Tablets</title>
+<!--    <script type="text/javascript">
+      body onload= "checkcolor()";
+   </script> -->
+   <link rel="stylesheet" type="text/css" href="./index.css">
+   <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
+   <!-- <style type="text/css">
+   .canvasSignature{
+      width: 60%;
+      height: 100%;
+   }
+   </style> -->
+   <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/solid.js" integrity="sha384-+Ga2s7YBbhOD6nie0DzrZpJes+b2K1xkpKxTFFcx59QmVPaSA8c7pycsNaFwUK6l" crossorigin="anonymous"></script>
+   <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/fontawesome.js" integrity="sha384-7ox8Q2yzO/uWircfojVuCQOZl+ZZBg2D2J5nkpLqzH1HY0C1dHlTKIbpRz/LG23c" crossorigin="anonymous"></script>
+
+   <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
+   <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+ 
+   <script type="text/javascript">
+
+      function myfunc () {
+
+         var stylesFiles = [];
+         var globalStyle = "";
+         var userEmail = "";
+
+         document.getElementsByClassName("textcolor")[0].addEventListener("input", function(event) {
+            changecolor(event.target.value);
+         });
+         // works out the X, Y position of the click inside the canvas from the X, Y position on the page
+         
+        var thecolor = document.getElementsByClassName("textcolor")[0].value;
+         // get references to the canvas element as well as the 2D drawing context
+         var sigCanvas = document.getElementById("canvasSignature");
+         var context = sigCanvas.getContext("2d");
+        var colorIndex = 0;
+        context.lineWidth = 20;
+         context.strokeStyle = 'Black';
+         context.fillStyle = "#FFFFFF";
+         context.fillRect(0,0,sigCanvas.width, sigCanvas.height);
+         var imgData=context.getImageData(0,0,sigCanvas.width,sigCanvas.height);
+          var data=imgData.data;
+          for(var i=0;i<data.length;i+=4){
+              if(data[i+3]<255){
+                  data[i] = 255 - data[i];
+                  data[i+1] = 255 - data[i+1];
+                  data[i+2] = 255 - data[i+2];
+                  data[i+3] = 255 - data[i+3];
+              }
+          }
+          context.putImageData(imgData,0,0);
+         const socket = io();
+         socket.on('image', function(msg){
+           console.log("Got an image from the backend do something with it")
+           $('#thumbnail-image').attr('src', msg);
+           toastr.info("Got one more iteration of your doodle ... :)")
+         });
+
+         socket.on('doodled', function(msg) {
+            toastr.success("Your doodle is ready ...")
+         })
+
+      function getPosition(mouseEvent, sigCanvas) {
+         var x, y;
+         if (mouseEvent.pageX != undefined && mouseEvent.pageY != undefined) {
+            x = mouseEvent.pageX;
+            y = mouseEvent.pageY;
+         } else {
+            x = mouseEvent.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+            y = mouseEvent.clientY + document.body.scrollTop + document.documentElement.scrollTop;
+         }
+ 
+         return { X: x - sigCanvas.offsetLeft, Y: y - sigCanvas.offsetTop };
+      } 
+
+        var colors = ['#FF0000', '#00FF00', '#0000FF', '#000000'];
+        var currentWidth = 15;
+        document.addEventListener('keydown', (event) => {
+      console.log(event);
+
+      if(event.key == "ArrowUp") {
+        colorIndex = (colorIndex + 1) % colors.length;
+      } else
+      if(event.key == "ArrowDown") {
+        colorIndex = (colorIndex - 1) % colors.length;
+      } else
+      if(event.key == "ArrowRight") {
+        currentWidth = Math.max((currentWidth - 2), 10);
+      } else
+      if(event.key == "ArrowLeft") {
+        currentWidth = Math.min((currentWidth + 2), 25);
+      }
+      if(event.key == "-")
+          {
+            context.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
+          }
+      console.log(currentWidth);
+      context.lineWidth = currentWidth;
+      changecolor(colors[colorIndex]);
+
+    });
+
+ 
+
+ 
+         // This will be defined on a TOUCH device such as iPad or Android, etc.
+         var is_touch_device = 'ontouchstart' in document.documentElement;
+ 
+         if (is_touch_device) {
+            // create a drawer which tracks touch movements
+            var drawer = {
+               isDrawing: false,
+               touchstart: function (coors) {
+                  context.beginPath();
+                  context.moveTo(coors.x, coors.y);
+                  this.isDrawing = true;
+               },
+               touchmove: function (coors) {
+                  if (this.isDrawing) {
+                     context.lineTo(coors.x, coors.y);
+                     context.stroke();
+                  }
+               },
+               touchend: function (coors) {
+                  if (this.isDrawing) {
+                     this.touchmove(coors);
+                     this.isDrawing = false;
+                  }
+               }
+            };
+ 
+            // create a function to pass touch events and coordinates to drawer
+            function draw(event) {
+ 
+               // get the touch coordinates.  Using the first touch in case of multi-touch
+               var coors = {
+                  x: event.targetTouches[0].pageX,
+                  y: event.targetTouches[0].pageY
+               };
+ 
+               // Now we need to get the offset of the canvas location
+               var obj = sigCanvas;
+ 
+               if (obj.offsetParent) {
+                  // Every time we find a new object, we add its offsetLeft and offsetTop to curleft and curtop.
+                  do {
+                     coors.x -= obj.offsetLeft;
+                     coors.y -= obj.offsetTop;
+                  }
+              // The while loop can be "while (obj = obj.offsetParent)" only, which does return null
+              // when null is passed back, but that creates a warning in some editors (i.e. VS2010).
+                  while ((obj = obj.offsetParent) != null);
+               }
+ 
+               // pass the coordinates to the appropriate handler
+               drawer[event.type](coors);
+            }
+ 
+
+            // attach the touchstart, touchmove, touchend event listeners.
+            sigCanvas.addEventListener('touchstart', draw, false);
+            sigCanvas.addEventListener('touchmove', draw, false);
+            sigCanvas.addEventListener('touchend', draw, false);
+ 
+            // prevent elastic scrolling
+            sigCanvas.addEventListener('touchmove', function (event) {
+               event.preventDefault();
+            }, false); 
+         }
+         else {
+ 
+            // start drawing when the mousedown event fires, and attach handlers to
+            // draw a line to wherever the mouse moves to
+            $("#canvasSignature").mousedown(function (mouseEvent) {
+               var position = getPosition(mouseEvent, sigCanvas);
+ 
+               context.moveTo(position.X, position.Y);
+               context.beginPath();
+ 
+               // attach event handlers
+               $(this).mousemove(function (mouseEvent) {
+                  drawLine(mouseEvent, sigCanvas, context);
+               }).mouseup(function (mouseEvent) {
+                  finishDrawing(mouseEvent, sigCanvas, context);
+               }).mouseout(function (mouseEvent) {
+                  finishDrawing(mouseEvent, sigCanvas, context);
+               });
+            });
+ 
+         }
+ 
+      // draws a line to the x and y coordinates of the mouse event inside
+      // the specified element using the specified context
+      function drawLine(mouseEvent, sigCanvas, context) {
+ 
+         var position = getPosition(mouseEvent, sigCanvas);
+ 
+         context.lineTo(position.X, position.Y);
+         context.stroke();
+      }
+ 
+      // draws a line from the last coordiantes in the path to the finishing
+      // coordinates and unbind any event handlers which need to be preceded
+      // by the mouse down event
+      function finishDrawing(mouseEvent, sigCanvas, context) {
+         // draw the line to the finishing coordinates
+         drawLine(mouseEvent, sigCanvas, context);
+ 
+         context.closePath();
+ 
+         // unbind any events which could draw
+         $(sigCanvas).unbind("mousemove")
+                     .unbind("mouseup")
+                     .unbind("mouseout");
+      }
+      /*function checkcolor(){*/
+
+      function changecolor(thecolor){
+         console.log("Inside change color")
+         var sigCanvas = document.getElementById("canvasSignature");
+         var context = sigCanvas.getContext("2d");
+         context.strokeStyle = thecolor;
+      }
+
+      function dataURItoBlob(dataURI) {
+          // convert base64/URLEncoded data component to raw binary data held in a string
+          var byteString;
+          if (dataURI.split(',')[0].indexOf('base64') >= 0)
+              byteString = atob(dataURI.split(',')[1]);
+          else
+              byteString = unescape(dataURI.split(',')[1]);
+
+          // separate out the mime component
+          var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+
+          // write the bytes of the string to a typed array
+          var ia = new Uint8Array(byteString.length);
+          for (var i = 0; i < byteString.length; i++) {
+              ia[i] = byteString.charCodeAt(i);
+          }
+
+          return new Blob([ia], {type:mimeString});
+      }
+
+      const fetchStyles = function() {
+          var headers = Object.assign({},
+                            {'content-type': 'application/json'}
+                        );
+         return fetch('/getstyles', {
+              method: 'GET',
+              headers: headers
+           })
+           .then(function(response) {
+             return response.json();
+           })
+           .then(function(myJson) {
+             stylesFiles = myJson.files;
+             return stylesFiles;
+           });
+      }
+
+      const fetchPreviousDoodles = function() {
+         var headers = Object.assign({},
+                            {'content-type': 'application/json'}
+                        );
+         return fetch('/getprevious', {
+              method: 'GET',
+              headers: headers
+           })
+           .then(function(response) {
+             return response.json();
+           })
+           .then(function(myJson) {
+             previousDoodles = myJson.files;
+             return previousDoodles;
+           });
+      }
+
+      document.getElementsByClassName("style-select-button")[0].addEventListener("click", function(e) {
+         e.stopPropagation();
+         document.getElementsByClassName("styles-options")[0].style.display = "flex";
+         fetchStyles()
+            .then(files => {
+               console.log(files);
+               var imagesHtml = "";
+               files.forEach(ele => {
+                  imagesHtml += `<div><img src="${ele}" class="image-container" /></div>`;
+               })
+               document.getElementsByClassName("styles-image-container")[0].innerHTML = imagesHtml;
+               addEvListenerToImages();
+            });
+      })
+
+
+      document.getElementsByClassName("email-select-button")[0].addEventListener("click", function(e) {
+        document.getElementsByClassName("email-input-container")[0].style.display = "flex";
+      })
+
+      document.getElementsByClassName("email-input-container")[0].addEventListener("click", function(e) {
+         e.target.style.display = "none";
+      });
+
+      document.getElementsByClassName("email-input-container")[0].addEventListener("submit", function(e) {
+         e.preventDefault();
+         userEmail = document.getElementById("user-email").value;
+         toastr.success(`Got user Email : ${userEmail}`)
+         e.target.style.display = "none";
+      });
+
+      document.getElementById("user-email").addEventListener("click", function(e) {
+         e.stopPropagation();
+      })
+
+      document.getElementsByClassName("styles-options")[0].addEventListener("click", function(e) {
+         e.target.style.display = "none";
+      });
+
+      const addEvListenerToImages = function() {      
+         var temp = document.getElementsByClassName("image-container");
+         Array.from(temp).forEach(function(ele) {
+            ele.addEventListener("click", function(e) {
+               e.stopPropagation();
+               globalStyle = e.target.src.split("/")[e.target.src.split("/").length - 1].split(".")[0];
+               document.getElementsByClassName("styles-options")[0].style.display = "none";
+               toastr.success(`Successfully selected style : ${globalStyle}`)
+             })
+         })
+      }
+
+      document.getElementsByClassName("styles-image-container")[0].addEventListener("click", function(e) {
+         e.stopPropagation();
+      });
+
+      document.getElementsByClassName("btn draw-border")[0].addEventListener("click", function(e) {
+         toastr.info("Started working on your doodle ....");
+         document.getElementById("thumbnail-image").src = "loading.gif"
+         var dataUri = document.getElementById("canvasSignature").toDataURL();
+         /*var blob = dataURItoBlob(dataUri);
+         let formdata = new FormData();
+         formdata.append('photo', blob);
+         formdata.append('mail', "deepshpathak@gmail.com")
+         formdata.append('style', "Monet")*/
+
+         var headers = Object.assign({},
+                            {'content-type': 'application/json'}
+                        );
+         fetch('/', {
+              method: 'POST',
+              headers: headers,
+              body: JSON.stringify({
+               photo: dataUri,
+               mail: userEmail,
+               style: globalStyle || 'Renoir'
+              })
+           })
+           .then(function(response) {
+             return response.json();
+           })
+           .then(function(myJson) {
+             console.log(myJson);
+           });
+      })
+
+
+      document.getElementsByClassName("show-prev")[0].addEventListener("click", function(e) {
+         document.getElementsByClassName("close-prev")[0].style.display = "block";
+         document.getElementsByClassName("show-prev")[0].style.display = "none";
+         document.getElementsByClassName("previous-doodles")[0].style.height = "100vh";
+         fetchPreviousDoodles()
+            .then(files => {
+               console.log(files);
+               var imagesHtml = "";
+               files.forEach(ele => {
+                  imagesHtml += `<div class="prev-doodle-container"><img src="uploaded/${ele}" class="prev-doodle-image" /><img src="doodled/${ele}" class="prev-doodle-image" /></div>`;
+               })
+               document.getElementsByClassName("previous-doodles-internal")[0].innerHTML = imagesHtml;
+            });
+      });
+
+      document.getElementsByClassName("close-prev")[0].addEventListener("click", function(e) {
+         document.getElementsByClassName("close-prev")[0].style.display = "none";
+         document.getElementsByClassName("show-prev")[0].style.display = "block";
+         document.getElementsByClassName("previous-doodles")[0].style.height = "0";
+      });
+   
+    
+   }
+;
+      
+
+   </script>
+   
+</head>
+ 
+<body onload="myfunc()">
+   <div class="flex">
+      <div class="child">
+         <div class="align-center vertical-padding">
+            <label class="padding-small">Choose a color</label>
+            <input type="color" class="textcolor" list="black">
+            <datalist id="black">
+               <option>#FF0000</option>
+               <option>#00FF00</option>
+               <option>#0000FF</option>
+               <option>#000000</option>
+            </datalist>
+         </div>
+         <div id="canvasDiv" class="align-center">
+            <!-- It's bad practice (to me) to put your CSS here.  I'd recommend the use of a CSS file! -->
+            <canvas id="canvasSignature" height="312px" width = "512px" style="border:1px solid #000000;"></canvas>
+            <!-- <button class="submit-button">Submit</button> -->
+         </div>
+         <div class="align-center">
+            <button class="btn draw-border" style="border:1px solid #000000;">Submit</button>
+         </div>
+      </div>
+      <div class="child vertical-align-center">
+         <img id="thumbnail-image" src="">
+      </div>
+
+      <div class="style-attr flex">
+         <div class="style-select-button flex">
+            Select style
+         </div>
+         <div class="email-select-button flex">
+            Enter email
+         </div>
+      </div>
+
+   </div>
+   <div class="styles-options">
+      <div class="styles-image-container">
+         <img class="image-container">
+      </div>
+   </div>
+
+   <form class="email-input-container">
+      <input type="text" name="email" id="user-email" autocomplete="off">
+   </form>
+
+
+   <div class="previous-doodles">
+      <div class="previous-doodles-internal">
+         
+      </div>
+   </div>
+
+   <div class="icon-down align-center">
+      <span class="close-prev "><i class="icon fas fa-arrow-down"></i></span>
+   </div>
+
+   <div class="icon-up align-center">
+      <span class=" show-prev"><i class="icon fas fa-arrow-up"></i></span>
+   </div>
+
+</body>
+</html>

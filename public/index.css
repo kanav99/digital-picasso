@@ -1,0 +1,245 @@
+@import url('https://fonts.googleapis.com/css?family=Roboto');
+.parent{
+	display: flex;
+}
+#right{
+	width: 50vw;
+	display: inline-block;
+	height: 80vh;
+}
+
+body {
+  color: #333;
+}
+@mixin btnborder-drawing($color: #ccc, $hover: black, $width: 2px, $vertical: top, $horizontal: left, $duration: 0.25s) {
+  box-shadow: inset 0 0 0 $width $color;
+  color: $color;
+  transition: color $duration $duration/3;
+  position: relative;
+  
+  &::before,
+  &::after {
+    border: 0 solid transparent;
+    box-sizing: border-box;
+    content: '';
+    pointer-events: none;
+    position: absolute;
+    width: 0; height: 0;
+    #{$vertical}: 0; 
+    #{$horizontal}: 0;
+  }
+
+  &::before {
+    $h-side: if($horizontal == 'left', 'right', 'left');
+    
+    border-#{$vertical}-width: $width;
+    border-#{$h-side}-width: $width;
+  }
+  
+  &::after {
+    $v-side: if($vertical == 'top', 'bottom', 'top');
+    
+    border-#{$v-side}-width: $width;
+    border-#{$horizontal}-width: $width;
+  }
+  
+  &:hover {
+    color: $hover;
+    
+    &::before,
+    &::after {
+      border-color: $hover;
+      transition: border-color 0s, width $duration, height $duration;
+      width: 100%;
+      height: 100%;
+    }
+    
+    &::before { transition-delay: 0s, 0s, $duration; }
+    
+    &::after { transition-delay: 0s, $duration, 0s; }
+  }
+}
+
+.draw-border {
+  @include btnborder-drawing(#58afd1, #ffe593, 4px, bottom, right);
+}
+.btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  line-height: 1.5;
+  font: 700 1.2rem 'Roboto Slab', sans-serif;
+  padding: 0.5em 1em;
+  letter-spacing: 0.05rem;
+  
+  &:focus { outline: 2px dotted #55d7dc; }
+}
+
+
+.flex {
+	display: flex;
+}
+
+.child {
+	flex-basis: 50%;
+}
+
+.align-center {
+	display: flex;
+	justify-content: center;
+}
+
+.vertical-align-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.padding-small {
+	padding: 0 30px;
+}
+
+.vertical-padding {
+	padding: 20px 0;
+}
+
+#canvasDiv{
+	padding-bottom: 10px;
+}
+.padding-small{
+	font-family: Roboto;
+	font-weight: bolder;
+	font-size: 25px;
+}
+
+.style-attr {
+  position: fixed;
+  bottom: 0;
+  height: 40px;
+  width: 100vw;
+  justify-content: space-around;
+}
+
+.style-select-button {
+  font-family: Roboto;
+  font-weight: bold;
+  font-size: 18px;
+  cursor: pointer;
+  color: #555;
+}
+
+.email-select-button {
+  font-family: Roboto;
+  font-weight: bold;
+  font-size: 18px;
+  cursor: pointer;
+  color: #555;
+}
+
+.styles-options {
+  height: 100vh;
+  width: 100vw;
+  position: fixed;
+  top: 0;
+  left: 0;
+  align-items: center;
+  justify-content: center;
+  display: none;
+  background: rgba(0,0,0,0.5);
+}
+
+.email-input-container {
+  height: 100vh;
+  width: 100vw;
+  position: fixed;
+  top: 0;
+  left: 0;
+  align-items: center;
+  justify-content: center;
+  display: none;
+  background: rgba(0,0,0,0.5);
+}
+
+#user-email {
+  width: 50vw;
+  text-decoration: none;
+  border: none;
+  outline: none;
+  padding: 10px;
+  font-size: 24px;
+  background-color: transparent;
+  color: #FFF;
+  text-align: center;
+  border-bottom: 3px #aaa solid;
+}
+
+.styles-image-container {
+  height: 90vh;
+  overflow-y: scroll;
+}
+
+.styles-images {
+  height: 520px;
+  width: 312px;
+}
+
+.image-container {
+  cursor: pointer;
+}
+
+.previous-doodles {
+  width: 100vw;
+  height: 0;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  transition: height 0.25s ease-in;
+  background: rgba(0,0,0,0.7);
+  overflow-y: scroll;
+  box-sizing: border-box;
+}
+
+.previous-doodles-internal {
+  margin: 75px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-down {
+  position: fixed;
+  top: 0;
+  width: 100vw;
+  height: 30px;
+  color: white;
+}
+
+.icon-up {
+  position: fixed;
+  bottom: 0;
+  width: 100vw;
+  height: 30px;
+  z-index: 100;
+}
+
+.icon {
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  z-index: 100;
+}
+
+.show-prev {
+  display: block;
+}
+
+.close-prev {
+  display: none;
+}
+
+.prev-doodle-container {
+  display: flex;
+  justify-content: space-around;
+  margin: 20px 0;
+}
